@@ -1,6 +1,10 @@
 #include <string>
 #include <fstream>
 #include <array>
+#include <set>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class Lexer
 {
@@ -31,10 +35,7 @@ public:
     Lexer::TokenType get_token();
     std::string get_token_text() const { return m_lexeme; }
 
-
 private:
-    const std::array<char, 13> ops { '+', '-', '/', '*', '%', '!', '>', '<', '=', '|', '&', '~', '^' };
-
     enum class State
     {
         None,
@@ -58,9 +59,13 @@ private:
     // костыль
     bool is_multicomment;
 
+    std::set<std::string> m_keywords;
+    std::set<std::string> m_special_words;
+    std::set<char> m_operators;
+
 private:
+    void read_config();
     void set_state(State state);
     void get_next_char() { m_ch = m_file.get(); }
     bool end_of_file() { return m_file.eof(); }
-
 };

@@ -5,8 +5,6 @@
 #include <fstream>
 #include <iomanip>
 
-
-
 std::string tokens[]
 {
     "Keyword",

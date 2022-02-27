@@ -1,9 +1,8 @@
 #include "lexer.h"
 #include <iostream>
-#include <array>
 #include <algorithm>
 #include <fmt/color.h>
-#include "c_lang.h"
+//#include "language_info.h"
 
 
 /*
@@ -13,6 +12,9 @@
 считать в буфер, но надо будет подставить функцию вместо гет_некст_чар. указатель на член класса
 */
 
+const std::string path_to_lang_config = "configs/language/";
+const std::string path_to_color_scheme = "config/color/";
+
 Lexer::Lexer(const std::string &filename) :
     m_file(filename), m_state(State::None), m_lexeme(""), is_multicomment(false)
 {
@@ -21,7 +23,38 @@ Lexer::Lexer(const std::string &filename) :
         fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "File {} is not open :(\n", filename);
         exit(-1);
     }
+    read_config();
     get_next_char();
+}
+
+void Lexer::read_config()
+{
+    // здесь будет определяться какой конфиг выбрать
+    std::string filename = path_to_lang_config + "c.json";
+    std::ifstream lang_info { filename };
+    if (!lang_info.is_open())
+    {
+        fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "Config file {} is not open :(\n", filename);
+    }
+    json j_info;
+    lang_info >> j_info;
+    lang_info.close();
+
+    for (auto it = j_info["keywords"].begin(); it != j_info["keywords"].end(); ++it)
+    {
+        std::string word = it.value();
+        m_keywords.emplace(word);
+    }
+    for (auto it = j_info["special_words"].begin(); it != j_info["special_words"].end(); ++it)
+    {
+        std::string word = it.value();
+        m_special_words.emplace(word);
+    }
+    for (auto it = j_info["operators"].begin(); it != j_info["operators"].end(); ++it)
+    {
+        std::string word = it.value();
+        m_operators.emplace(word.at(0));
+    }
 }
 
 void Lexer::set_state(State state)
@@ -62,7 +95,7 @@ Lexer::TokenType Lexer::get_token()
                 set_state(State::Literal);
                 break;
             }
-            if (std::find(ops.begin(), ops.end(), m_ch) != ops.end())
+            if (m_operators.find(m_ch) != m_operators.end())
             {
                 if (m_ch == '/' && (m_file.peek() == '/' || m_file.peek() == '*'))
                 {
@@ -110,9 +143,9 @@ Lexer::TokenType Lexer::get_token()
             if (end_of_file())
             {
                 m_state = State::End;
-                return keywords.find(m_lexeme) != keywords.end() ?
+                return m_keywords.find(m_lexeme) != m_keywords.end() ?
                     TokenType::Keyword :
-                        special_words.find(m_lexeme) != special_words.end() ?
+                        m_special_words.find(m_lexeme) != m_special_words.end() ?
                             TokenType::SpecWord : TokenType::Id;
             }
             if (isalnum(m_ch) || m_ch == '_')
@@ -121,9 +154,9 @@ Lexer::TokenType Lexer::get_token()
                 break;
             }
             m_state = State::None;
-            return keywords.find(m_lexeme) != keywords.end() ?
+            return m_keywords.find(m_lexeme) != m_keywords.end() ?
                 TokenType::Keyword :
-                    special_words.find(m_lexeme) != special_words.end() ?
+                    m_special_words.find(m_lexeme) != m_special_words.end() ?
                         TokenType::SpecWord : TokenType::Id;
         case State::Literal:
             if (end_of_file())
