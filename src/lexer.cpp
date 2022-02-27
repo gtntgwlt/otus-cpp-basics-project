@@ -2,7 +2,6 @@
 #include <iostream>
 #include <algorithm>
 #include <fmt/color.h>
-//#include "language_info.h"
 
 
 /*
@@ -13,7 +12,7 @@
 */
 
 const std::string path_to_lang_config = "configs/language/";
-const std::string path_to_color_scheme = "config/color/";
+const std::string path_to_color_scheme = "configs/color/";
 
 Lexer::Lexer(const std::string &filename) :
     m_file(filename), m_state(State::None), m_lexeme(""), is_multicomment(false)
