@@ -8,9 +8,9 @@ class Printer
 public:
     Printer(Lexer &lexer) : lex(lexer) {}
 
-    void print();
+    virtual void print();
 
-private:
+protected:
     Lexer &lex;
 };
 

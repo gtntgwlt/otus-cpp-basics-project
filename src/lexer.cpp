@@ -29,6 +29,7 @@ Lexer::Lexer(const std::string &filename) :
 void Lexer::read_config()
 {
     // здесь будет определяться какой конфиг выбрать
+    language = "c";
     std::string filename = path_to_lang_config + "c.json";
     std::ifstream lang_info { filename };
     if (!lang_info.is_open())

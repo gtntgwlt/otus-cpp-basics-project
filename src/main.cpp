@@ -3,7 +3,12 @@
 #include <string>
 #include "lexer.h"
 #include "printer.h"
+#include "lang/c_printer.h"
 
+/*
+    мб предобработка файла тут. узнать язык, посчитать количество строк
+    в лекс передать инфо об языке для загрузки конфига
+*/
 
 int main(int argc, const char** argv)
 {
@@ -14,9 +19,15 @@ int main(int argc, const char** argv)
     }
     std::string filename = argv[1];
     Lexer lex(filename);
-    Printer out(lex);
-    out.print();
+    Printer *out; // do smart pointer
+    if (lex.get_language() == "c")
+        out = new C_Printer(lex);
+    else
+        out = new Printer(lex);
 
+    out->print();
+
+    delete out;
     std::cout << std::endl << std::endl;
     return 0;
 }

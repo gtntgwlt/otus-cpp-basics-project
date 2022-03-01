@@ -1,9 +1,9 @@
-
 #include <iostream>
 #include <fmt/color.h>
-#include "printer.h"
+#include "lang/c_printer.h"
 
-void Printer::print()
+
+void C_Printer::print()
 {
     int line_num = 1;
     std::cout << "\n\n" << std::setw(2) << line_num << " |  ";
@@ -22,14 +22,26 @@ void Printer::print()
             case Lexer::TokenType::Default:
                 std::cout << lex.get_token_text();
                 break;
+            case Lexer::TokenType::Preproc:
+                fmt::print(fg(fmt::color::crimson), "{}", lex.get_token_text());
+                break;
             case Lexer::TokenType::Number:
                 fmt::print(fg(fmt::color::slate_blue), "{}", lex.get_token_text());
+                break;
+            case Lexer::TokenType::Comment:
+                fmt::print(fg(fmt::color::green), "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Operator:
                 fmt::print(fg(fmt::color::salmon), "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Literal:
                 fmt::print(fg(fmt::color::magenta), "{}", lex.get_token_text());
+                break;
+            case Lexer::TokenType::SpecWord:
+                fmt::print(fg(fmt::color::orange), "{}", lex.get_token_text());
+                break;
+            case Lexer::TokenType::Keyword:
+                fmt::print(fg(fmt::color::sienna) | fmt::emphasis::bold, "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Escape:
                 fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "{}", lex.get_token_text());
@@ -42,4 +54,3 @@ void Printer::print()
         }
     }
 }
-

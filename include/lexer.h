@@ -36,6 +36,7 @@ public:
 
     Lexer::TokenType get_token();
     std::string get_token_text() const { return m_lexeme; }
+    std::string get_language() const { return language; }
 
 private:
     enum class State
@@ -53,6 +54,7 @@ private:
         End,
     };
     State m_state;
+    std::string language;
 
     std::ifstream m_file;
     std::string m_lexeme;

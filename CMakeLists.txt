@@ -10,6 +10,7 @@ add_executable(
     src/main.cpp
     src/lexer.cpp
     src/printer.cpp
+    src/lang/c_printer.cpp
 )
 
 target_include_directories(bat PRIVATE include)
