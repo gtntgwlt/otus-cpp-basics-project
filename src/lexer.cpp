@@ -89,7 +89,7 @@ Lexer::TokenType Lexer::get_token()
                 set_state(State::Id);
                 break;
             }
-            if (m_ch == '"')
+            if (m_ch == '"' || m_ch == '\'')
             {
                 set_state(State::Literal);
                 break;
@@ -163,7 +163,7 @@ Lexer::TokenType Lexer::get_token()
                 m_state = State::End;
                 return TokenType::Literal;
             }
-            if (m_ch == '"')
+            if (m_ch == '"' || m_ch == '\'')
             {
                 set_state(State::None);
                 return TokenType::Literal;
