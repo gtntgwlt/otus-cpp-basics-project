@@ -76,6 +76,21 @@ void C_Printer::print()
                 {
                     fmt::print(fg(fmt::color::slate_blue), "{}", lex.get_token_text());
                 }
+                else if (!stack.empty() && (stack.top() == "define" || stack.top() == "ifdef" || stack.top() == "ifndef" ))
+                {
+                    fmt::print(fg(fmt::color::plum), "{}", lex.get_token_text());
+                    stack.pop();
+                }
+                else if (!stack.empty() && stack.top() == "pragma")
+                {
+                    while (token != Lexer::TokenType::EndLine)
+                    {
+                        fmt::print(fg(fmt::color::plum), "{}", lex.get_token_text());
+                        token = lex.get_token();
+                    }
+                    std::cout << std::endl << std::setw(2) << ++line_num << " |  ";
+                    stack.pop();
+                }
                 else
                     std::cout << token_text;
                 break;
@@ -99,5 +114,6 @@ void C_Printer::print()
 }
 
 /*
-    разобраться с ошибкой в файле ~/Work/qemu_natch/exec-vary.c
+    мб лексема тип, в конфиг.
+    pragma - всю строчку до конца
 */
