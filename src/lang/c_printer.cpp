@@ -76,7 +76,7 @@ void C_Printer::print()
                 {
                     fmt::print(fg(fmt::color::slate_blue), "{}", lex.get_token_text());
                 }
-                else if (!stack.empty() && (stack.top() == "define" || stack.top() == "ifdef" || stack.top() == "ifndef" ))
+                else if (!stack.empty() && (preproc_names.find(stack.top()) != preproc_names.end()))
                 {
                     fmt::print(fg(fmt::color::plum), "{}", lex.get_token_text());
                     stack.pop();
@@ -115,5 +115,4 @@ void C_Printer::print()
 
 /*
     мб лексема тип, в конфиг.
-    pragma - всю строчку до конца
 */
