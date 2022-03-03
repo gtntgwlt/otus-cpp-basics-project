@@ -2,8 +2,7 @@
 #include <fmt/color.h>
 #include <string>
 #include "lexer.h"
-#include "printer.h"
-#include "lang/c_printer.h"
+#include "printer_common.h"
 
 /*
     мб предобработка файла тут. узнать язык, посчитать количество строк

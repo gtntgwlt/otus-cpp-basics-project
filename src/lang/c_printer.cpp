@@ -1,10 +1,13 @@
 #include <iostream>
 #include <fmt/color.h>
+#include <stack>
 #include "lang/c_printer.h"
 
 
 void C_Printer::print()
 {
+    std::stack<std::string> stack;
+
     int line_num = 1;
     std::cout << "\n\n" << std::setw(2) << line_num << " |  ";
     while (true)
@@ -22,8 +25,14 @@ void C_Printer::print()
             case Lexer::TokenType::Default:
                 std::cout << lex.get_token_text();
                 break;
-            case Lexer::TokenType::Preproc:
+            case Lexer::TokenType::Lattice:
+                while (token != Lexer::TokenType::Id && token != Lexer::TokenType::Keyword)
+                {
+                    fmt::print(fg(fmt::color::crimson), "{}", lex.get_token_text());
+                    token = lex.get_token();
+                }
                 fmt::print(fg(fmt::color::crimson), "{}", lex.get_token_text());
+                stack.push(lex.get_token_text());
                 break;
             case Lexer::TokenType::Number:
                 fmt::print(fg(fmt::color::slate_blue), "{}", lex.get_token_text());
@@ -32,11 +41,45 @@ void C_Printer::print()
                 fmt::print(fg(fmt::color::green), "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Operator:
-                fmt::print(fg(fmt::color::salmon), "{}", lex.get_token_text());
+                if (!stack.empty() && lex.get_token_text() == "<" && stack.top() == "include")
+                {
+                    while (lex.get_token_text() != ">")
+                    {
+                        fmt::print(fg(fmt::color::yellow_green), "{}", lex.get_token_text());
+                        token = lex.get_token();
+                    }
+                    fmt::print(fg(fmt::color::yellow_green), "{}", lex.get_token_text());
+                    stack.pop();
+                }
+                else
+                {
+                    fmt::print(fg(fmt::color::salmon), "{}", lex.get_token_text());
+                }
                 break;
             case Lexer::TokenType::Literal:
-                fmt::print(fg(fmt::color::magenta), "{}", lex.get_token_text());
+            {
+                if (!stack.empty() && stack.top() == "include")
+                {
+                    fmt::print(fg(fmt::color::yellow_green), "{}", lex.get_token_text());
+                    stack.pop();
+                }
+                else
+                {
+                    fmt::print(fg(fmt::color::magenta), "{}", lex.get_token_text());
+                }
                 break;
+            }
+            case Lexer::TokenType::Id:
+            {
+                std::string token_text = lex.get_token_text();
+                if (token_text == "true" || token_text == "false")
+                {
+                    fmt::print(fg(fmt::color::slate_blue), "{}", lex.get_token_text());
+                }
+                else
+                    std::cout << token_text;
+                break;
+            }
             case Lexer::TokenType::SpecWord:
                 fmt::print(fg(fmt::color::orange), "{}", lex.get_token_text());
                 break;
@@ -54,3 +97,7 @@ void C_Printer::print()
         }
     }
 }
+
+/*
+    разобраться с ошибкой в файле ~/Work/qemu_natch/exec-vary.c
+*/

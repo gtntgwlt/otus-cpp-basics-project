@@ -45,11 +45,11 @@ void Lexer::read_config()
         std::string word = it.value();
         m_keywords.emplace(word);
     }
-    for (auto it = j_info["special_words"].begin(); it != j_info["special_words"].end(); ++it)
-    {
-        std::string word = it.value();
-        m_special_words.emplace(word);
-    }
+    // for (auto it = j_info["special_words"].begin(); it != j_info["special_words"].end(); ++it)
+    // {
+    //     std::string word = it.value();
+    //     m_special_words.emplace(word);
+    // }
     for (auto it = j_info["operators"].begin(); it != j_info["operators"].end(); ++it)
     {
         std::string word = it.value();
@@ -107,7 +107,7 @@ Lexer::TokenType Lexer::get_token()
             }
             if (m_ch == '#')
             {
-                set_state(State::Preproc);
+                m_state = State::Lattice;
                 break;
             }
             if (end_of_file())
@@ -181,13 +181,12 @@ Lexer::TokenType Lexer::get_token()
             set_state(State::Literal);
             set_state(State::Literal);
             return TokenType::Escape;
-        case State::Comment:
+        case State::Comment: // no for all languages
             if (end_of_file())
             {
                 m_state = State::End;
                 return TokenType::Comment;
             }
-            // убрать отсюда это безобразие, лексер должен быть максимально универсальным
             if (m_ch == '/')
             {
                 while (m_ch != '\n')
@@ -240,21 +239,30 @@ Lexer::TokenType Lexer::get_token()
                 m_state = State::None;
             }
             return TokenType::Operator;
-        case State::Preproc:
+        case State::Lattice:
             if (end_of_file())
             {
                 m_state = State::End;
-                return TokenType::Preproc;
+                return TokenType::Lattice;
             }
-            // придумать что-то с include
-            if (isspace(m_ch))
-            {
-                m_state = State::None;
-                return TokenType::Preproc;
-            }
-            set_state(State::Preproc);
-            break;
+            set_state(State::None);
+            return TokenType::Lattice;
         }
+        // case State::Preproc:
+        //     if (end_of_file())
+        //     {
+        //         m_state = State::End;
+        //         return TokenType::Preproc;
+        //     }
+        //     // придумать что-то с include
+        //     if (isspace(m_ch))
+        //     {
+        //         m_state = State::None;
+        //         return TokenType::Preproc;
+        //     }
+        //     set_state(State::Preproc);
+        //     break;
+        // }
     }
 }
 

@@ -25,6 +25,7 @@ public:
         Preproc,
         Comment,
         EndLine,
+        Lattice,
         Error,
         End,
     };
@@ -51,6 +52,7 @@ private:
         MultilineComment,
         Preproc,
         Escape,
+        Lattice,
         End,
     };
     State m_state;
@@ -65,7 +67,7 @@ private:
 
     std::set<std::string> m_keywords;
     std::set<std::string> m_special_words;
-    std::set<char> m_operators;
+    std::set<char> m_operators { '+', '-', '*', '/', '=' };
 
 private:
     void read_config();
