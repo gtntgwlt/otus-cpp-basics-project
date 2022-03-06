@@ -6,11 +6,12 @@
 class Printer
 {
 public:
-    Printer(Lexer &lexer) : lex(lexer) {}
+    Printer(Lexer &lexer);
 
     virtual void print();
 
 protected:
     Lexer &lex;
+    int m_lines;
 };
 

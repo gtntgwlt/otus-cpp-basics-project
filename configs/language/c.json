@@ -2,30 +2,21 @@
     "keywords": [
         "auto",
         "break",
-        "bool",
         "case",
-        "char",
         "const",
         "continue",
         "default",
         "do",
-        "double",
         "else",
         "enum",
-
         "extern",
-        "float",
         "for",
         "goto",
         "if",
         "inlineinline",
-        "int",
-        "long",
         "register",
         "restrictrestrict",
         "return",
-
-        "short",
         "signed",
         "sizeof",
         "static",
@@ -34,9 +25,7 @@
         "typedef",
         "union",
         "unsigned",
-        "void",
         "volatile",
-
         "while",
         "_Alignas_Alignas",
         "_Alignof_Alignof",
@@ -47,9 +36,20 @@
         "_Imaginary_Imaginary",
         "_Noreturn_Noreturn",
         "_Static_assert_Static_assert",
-        "_Thread_local_Thread_local"
+        "_Thread_local_Thread_local",
+        "__attribute__"
     ],
-    "special_words": [ "true", "false" ],
+    "types": [
+        "bool",
+        "char",
+        "double",
+        "float",
+        "int",
+        "long",
+        "short",
+        "void",
+        "size_t"
+    ],
     "operators": [ "+", "-", "/", "*", "%", "!", ">", "<", "=", "|", "&", "~", "^" ]
 }
 

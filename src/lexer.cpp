@@ -15,7 +15,8 @@ const std::string path_to_lang_config = "configs/language/";
 const std::string path_to_color_scheme = "configs/color/";
 
 Lexer::Lexer(const std::string &filename) :
-    m_file(filename), m_state(State::None), m_lexeme(""), is_multicomment(false)
+    m_file(filename), m_state(State::None), m_lexeme(""),
+    m_is_multicomment(false), m_prev_state(State::None)
 {
     if (!m_file.is_open())
     {
@@ -29,7 +30,7 @@ Lexer::Lexer(const std::string &filename) :
 void Lexer::read_config()
 {
     // здесь будет определяться какой конфиг выбрать
-    language = "c";
+    m_language = "c";
     std::string filename = path_to_lang_config + "c.json";
     std::ifstream lang_info { filename };
     if (!lang_info.is_open())
@@ -45,11 +46,11 @@ void Lexer::read_config()
         std::string word = it.value();
         m_keywords.emplace(word);
     }
-    // for (auto it = j_info["special_words"].begin(); it != j_info["special_words"].end(); ++it)
-    // {
-    //     std::string word = it.value();
-    //     m_special_words.emplace(word);
-    // }
+    for (auto it = j_info["types"].begin(); it != j_info["types"].end(); ++it)
+    {
+        std::string word = it.value();
+        m_types.emplace(word);
+    }
     for (auto it = j_info["operators"].begin(); it != j_info["operators"].end(); ++it)
     {
         std::string word = it.value();
@@ -64,6 +65,39 @@ void Lexer::set_state(State state)
     m_state = state;
 }
 
+Lexer::TokenType Lexer::get_id_type() const
+{
+    if (m_keywords.find(m_lexeme) != m_keywords.end())
+    {
+        return TokenType::Keyword;
+    }
+    else if (m_types.find(m_lexeme) != m_types.end())
+    {
+        return TokenType::Type;
+    }
+    return TokenType::Id;
+}
+
+Lexer::TokenType Lexer::read_literal(const char ch)
+{
+    if (end_of_file())
+    {
+        m_state = State::End;
+        return TokenType::Literal;
+    }
+    if (m_ch == ch)
+    {
+        set_state(State::None);
+        return TokenType::Literal;
+    }
+    else if (m_ch == '\\')
+    {
+        m_state = State::Escape;
+        return TokenType::Literal;
+    }
+    return TokenType::Empty;
+}
+
 Lexer::TokenType Lexer::get_token()
 {
     m_lexeme.clear();
@@ -76,7 +110,7 @@ Lexer::TokenType Lexer::get_token()
             if (m_ch == '\n')
             {
                 get_next_char();
-                if (is_multicomment)
+                if (m_is_multicomment)
                     m_state = State::MultilineComment;
                 return TokenType::EndLine;
             }
@@ -90,9 +124,16 @@ Lexer::TokenType Lexer::get_token()
                 set_state(State::Id);
                 break;
             }
-            if (m_ch == '"' || m_ch == '\'')
+            if (m_ch == '\'')
             {
-                set_state(State::Literal);
+                m_prev_state = State::LiteralOne;
+                set_state(State::LiteralOne);
+                break;
+            }
+            if (m_ch == '"')
+            {
+                m_prev_state = State::LiteralTwo;
+                set_state(State::LiteralTwo);
                 break;
             }
             if (m_operators.find(m_ch) != m_operators.end())
@@ -109,6 +150,16 @@ Lexer::TokenType Lexer::get_token()
             {
                 m_state = State::Lattice;
                 break;
+            }
+            if (m_ch == '(' || m_ch == '[' || m_ch == '{')
+            {
+                set_state(State::None);
+                return TokenType::LBracket;
+            }
+            if (m_ch == ')' || m_ch == ']' || m_ch == ')')
+            {
+                set_state(State::None);
+                return TokenType::RBracket;
             }
             if (end_of_file())
             {
@@ -135,6 +186,8 @@ Lexer::TokenType Lexer::get_token()
                 m_state = State::None;
                 if (std::count(m_lexeme.begin(), m_lexeme.end(), '.') > 1)
                     return TokenType::Error;
+                else if (m_lexeme == ".")
+                    return TokenType::Default;
                 else
                     return TokenType::Number;
             }
@@ -143,10 +196,7 @@ Lexer::TokenType Lexer::get_token()
             if (end_of_file())
             {
                 m_state = State::End;
-                return m_keywords.find(m_lexeme) != m_keywords.end() ?
-                    TokenType::Keyword :
-                        m_special_words.find(m_lexeme) != m_special_words.end() ?
-                            TokenType::SpecWord : TokenType::Id;
+                return get_id_type();
             }
             if (isalnum(m_ch) || m_ch == '_')
             {
@@ -154,32 +204,27 @@ Lexer::TokenType Lexer::get_token()
                 break;
             }
             m_state = State::None;
-            return m_keywords.find(m_lexeme) != m_keywords.end() ?
-                TokenType::Keyword :
-                    m_special_words.find(m_lexeme) != m_special_words.end() ?
-                        TokenType::SpecWord : TokenType::Id;
-        case State::Literal:
-            if (end_of_file())
-            {
-                m_state = State::End;
-                return TokenType::Literal;
-            }
-            if (m_ch == '"' || m_ch == '\'')
-            {
-                set_state(State::None);
-                return TokenType::Literal;
-            }
-            else if (m_ch == '\\')
-            {
-                m_state = State::Escape;
-                return TokenType::Literal;
-            }
-            set_state(State::Literal);
+            return get_id_type();
+        case State::LiteralOne:
+        {
+            TokenType token = read_literal('\'');
+            if  (token != TokenType::Empty)
+                return token;
+            set_state(State::LiteralOne);
             break;
+        }
+        case State::LiteralTwo:
+        {
+            TokenType token = read_literal('"');
+            if  (token != TokenType::Empty)
+                return token;
+            set_state(State::LiteralTwo);
+            break;
+        }
         case State::Escape:
             // сомнительное решение
-            set_state(State::Literal);
-            set_state(State::Literal);
+            set_state(m_prev_state);
+            set_state(m_prev_state);
             return TokenType::Escape;
         case State::Comment: // no for all languages
             if (end_of_file())
@@ -209,10 +254,10 @@ Lexer::TokenType Lexer::get_token()
                 m_state = State::End;
                 return TokenType::Comment;
             }
-            is_multicomment = true;
+            m_is_multicomment = true;
             if (m_ch == '*' && m_file.peek() == '/')
             {
-                is_multicomment = false;
+                m_is_multicomment = false;
                 set_state(State::None);
                 set_state(State::None);
                 return TokenType::Comment;

@@ -14,6 +14,12 @@ public:
     virtual void print();
 
 private:
-    std::set<std::string> preproc_names { "define", "undef", "if", "elif", "ifdef", "ifndef" };
+    void end_line(int &line_num);
+
+private:
+    std::set<std::string> m_types_tbl;
+    std::set<std::string> m_func_tbl;
+    std::set<std::string> m_preproc_names { "define", "undef", "if", "elif", "ifdef", "ifndef" };
+    std::set<std::string> m_structs { "struct", "union", "enum" };
 };
 

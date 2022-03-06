@@ -1,7 +1,17 @@
 
 #include <iostream>
 #include <fmt/color.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include "printer.h"
+
+Printer::Printer(Lexer &lexer) : lex(lexer)
+{
+    // seems only linux part
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    m_lines = w.ws_row;
+}
 
 void Printer::print()
 {
