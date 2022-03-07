@@ -15,7 +15,6 @@ public:
     {
         Keyword,
         Type,
-        SpecWord,
         Operator,
         LBracket,
         RBracket,
@@ -41,6 +40,7 @@ public:
     Lexer::TokenType get_token();
     std::string get_token_text() const { return m_lexeme; }
     std::string get_language() const { return m_language; }
+    std::string get_filename() const { return m_filename; }
 
 private:
     enum class State
@@ -61,6 +61,7 @@ private:
     };
     State m_state;
     std::string m_language;
+    std::string m_filename;
 
     std::ifstream m_file;
     std::string m_lexeme;

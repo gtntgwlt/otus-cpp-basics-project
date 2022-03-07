@@ -15,7 +15,7 @@ const std::string path_to_lang_config = "configs/language/";
 const std::string path_to_color_scheme = "configs/color/";
 
 Lexer::Lexer(const std::string &filename) :
-    m_file(filename), m_state(State::None), m_lexeme(""),
+    m_file(filename), m_filename(filename), m_state(State::None), m_lexeme(""),
     m_is_multicomment(false), m_prev_state(State::None)
 {
     if (!m_file.is_open())

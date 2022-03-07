@@ -13,5 +13,6 @@ public:
 protected:
     Lexer &lex;
     int m_lines;
+    int m_width;
 };
 

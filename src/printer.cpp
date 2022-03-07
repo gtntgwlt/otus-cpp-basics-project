@@ -11,6 +11,7 @@ Printer::Printer(Lexer &lexer) : lex(lexer)
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     m_lines = w.ws_row;
+    m_width = w.ws_col;
 }
 
 void Printer::print()

@@ -34,6 +34,14 @@ target_link_libraries(bat PRIVATE fmt::fmt)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(bat PRIVATE nlohmann_json nlohmann_json::nlohmann_json)
 
+# set(CURSES_NEED_NCURSES TRUE)
+# find_package(Curses REQUIRED)
+# target_include_directories(bat ${CURSES_INCLUDE_DIRS})
+# # target_compile_options(bat ${CURSES_CFLAGS})
+# target_link_libraries(bat PRIVATE ${CURSES_LIBRARIES})
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lncurses")
+
+
 set(CMAKE_BUILD_TYPE Debug)
 
 copy_directory(${CMAKE_CURRENT_SOURCE_DIR}/configs configs)

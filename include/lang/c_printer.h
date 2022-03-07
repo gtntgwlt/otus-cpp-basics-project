@@ -15,6 +15,7 @@ public:
 
 private:
     void end_line(int &line_num);
+    void print_line_string(int &line_num);
 
 private:
     std::set<std::string> m_types_tbl;

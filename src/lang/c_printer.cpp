@@ -1,33 +1,49 @@
 #include <iostream>
 #include <fmt/color.h>
+#include <fmt/format.h>
+//#include <ncurses/ncurses.h>
 #include <stack>
 #include <utility>
 #include "lang/c_printer.h"
 
 
+void C_Printer::print_line_string(int &line_num)
+{
+    fmt::print(fg(fmt::color::gray), "⁚{}⁚  ", fmt::format("{:^5}", ++line_num));
+}
+
 void C_Printer::end_line(int &line_num)
 {
+    static int last_line = -2;
     std::cout << std::endl;
-    if (line_num % (m_lines - 1) == 0)
+
+    if (last_line + m_lines - 2 == line_num)
     {
-        std::cout << ":\r";
+        // std::cout << "⁚\r";
+        fmt::print(fg(fmt::color::gray), "⁚{}⁚  ", fmt::format("{:^5}", std::string({"▼"})));
+
         char ch = getchar();
         if (ch == 'q')
             exit(0);
-        std::cout << "\r" << std::setw(2) << ++line_num << " |  ";
+        print_line_string(line_num);
+        last_line = line_num;
     }
     else
     {
-        std::cout << "\r" << std::setw(2) << ++line_num << " |  ";
+        print_line_string(line_num);
     }
 }
 
 void C_Printer::print()
 {
+    std::cout << std::endl;
+    fmt::print(fg(fmt::color::gray), "{}", fmt::format("{:.^{}}", " " + lex.get_filename() + " ", m_width));
+
     std::stack<std::pair<Lexer::TokenType, std::string>> stack;
 
-    int line_num = 1;
-    std::cout << "\n\n" << std::setw(2) << line_num << " |  ";
+    int line_num = 0;
+    fmt::print(fg(fmt::color::gray), "\n⁚{}⁚  \n", fmt::format("{:^5}", std::string()));
+    print_line_string(line_num);
     while (true)
     {
         Lexer::TokenType token = lex.get_token();
@@ -42,10 +58,10 @@ void C_Printer::print()
             case Lexer::TokenType::Lattice:
                 while (token != Lexer::TokenType::Id && token != Lexer::TokenType::Keyword)
                 {
-                    fmt::print(fg(fmt::color::crimson), "{}", lex.get_token_text());
+                    fmt::print(fg(fmt::color::tomato), "{}", lex.get_token_text());
                     token = lex.get_token();
                 }
-                fmt::print(fg(fmt::color::crimson), "{}", lex.get_token_text());
+                fmt::print(fg(fmt::color::tomato), "{}", lex.get_token_text());
                 stack.push(std::make_pair(token, lex.get_token_text()));
                 break;
             case Lexer::TokenType::Number:
@@ -87,7 +103,7 @@ void C_Printer::print()
                 }
                 else
                 {
-                    fmt::print(fg(fmt::color::magenta), "{}", lex.get_token_text());
+                    fmt::print(fg(fmt::color::light_green), "{}", lex.get_token_text());
                 }
                 break;
             }
@@ -115,19 +131,19 @@ void C_Printer::print()
                 }
                 else if (!stack.empty() && (m_structs.find(stack.top().second) != m_structs.end()))
                 {
-                    fmt::print(fg(fmt::color::deep_pink), "{}", lex.get_token_text());
+                    fmt::print(fg(fmt::color::pale_violet_red), "{}", lex.get_token_text());
                     stack.pop();
                     m_types_tbl.emplace(lex.get_token_text());
                 }
                 else if (m_types_tbl.find(lex.get_token_text()) != m_types_tbl.end())
                 {
-                    fmt::print(fg(fmt::color::deep_pink), "{}", lex.get_token_text());
+                    fmt::print(fg(fmt::color::pale_violet_red), "{}", lex.get_token_text());
                 }
                 else
                 {
                     if (!stack.empty() && (stack.top().second == "." || stack.top().second == ">"))
                     {
-                        fmt::print(fg(fmt::color::green_yellow) | fmt::emphasis::italic, "{}", token_text);
+                        fmt::print(fg(fmt::color::orange_red) | fmt::emphasis::italic, "{}", token_text);
                         if (stack.top().second == ">")
                             stack.pop();
                         stack.pop();
@@ -141,11 +157,8 @@ void C_Printer::print()
                 }
                 break;
             }
-            case Lexer::TokenType::SpecWord:
-                fmt::print(fg(fmt::color::orange), "{}", lex.get_token_text());
-                break;
             case Lexer::TokenType::Keyword:
-                fmt::print(fg(fmt::color::sienna) | fmt::emphasis::bold, "{}", lex.get_token_text());
+                fmt::print(fg(fmt::color::medium_violet_red) | fmt::emphasis::bold, "{}", lex.get_token_text());
                 if (m_structs.find(lex.get_token_text()) != m_structs.end())
                 {
                     stack.emplace(std::make_pair(token, lex.get_token_text()));
@@ -155,7 +168,7 @@ void C_Printer::print()
                 fmt::print(fg(fmt::color::golden_rod), "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Escape:
-                fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "{}", lex.get_token_text());
+                fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, "{}", lex.get_token_text());
                 break;
             case Lexer::TokenType::Error:
                 fmt::print(fg(fmt::color::red) | fmt::emphasis::bold, "{}", lex.get_token_text());
@@ -181,7 +194,3 @@ void C_Printer::print()
         }
     }
 }
-
-/*
-    мб лексема тип, в конфиг.
-*/
