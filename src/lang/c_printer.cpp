@@ -173,6 +173,11 @@ void C_Printer::print()
                                 lex.put_token(n_token, n_token_text);
                                 break;
                             }
+                            else
+                            {
+                                lex.put_token(n_token2, n_token_text2);
+                                lex.put_token(n_token, n_token_text);
+                            }
                         }
                         else
                         {
