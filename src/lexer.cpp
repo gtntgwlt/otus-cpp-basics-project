@@ -58,6 +58,21 @@ void Lexer::read_config()
     }
 }
 
+std::string Lexer::get_token_text()
+{
+    if (!returned_tokens.empty())
+    {
+        m_lexeme = returned_tokens.top().second;
+        returned_tokens.pop();
+    }
+    return m_lexeme;
+}
+
+void Lexer::put_token(TokenType token, const std::string text)
+{
+    returned_tokens.emplace(std::make_pair(token, text));
+}
+
 void Lexer::set_state(State state)
 {
     m_lexeme += m_ch;
@@ -100,6 +115,10 @@ Lexer::TokenType Lexer::read_literal(const char ch)
 
 Lexer::TokenType Lexer::get_token()
 {
+    if (!returned_tokens.empty())
+    {
+        return returned_tokens.top().first;
+    }
     m_lexeme.clear();
     while (true)
     {

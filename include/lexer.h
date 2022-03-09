@@ -4,6 +4,7 @@
 #include <fstream>
 #include <array>
 #include <set>
+#include <stack>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -38,9 +39,10 @@ public:
     Lexer(Lexer &&) = delete;
 
     Lexer::TokenType get_token();
-    std::string get_token_text() const { return m_lexeme; }
+    std::string get_token_text();// const { return m_lexeme; }
     std::string get_language() const { return m_language; }
     std::string get_filename() const { return m_filename; }
+    void put_token(TokenType token, const std::string text);
 
 private:
     enum class State
@@ -74,6 +76,8 @@ private:
     std::set<std::string> m_keywords;
     std::set<std::string> m_types;
     std::set<char> m_operators { '+', '-', '*', '/', '=' };
+
+    std::stack<std::pair<TokenType, std::string>> returned_tokens;
 
 private:
     void read_config();
